@@ -1,5 +1,4 @@
 // src/services/WebSocketService.js
-const logger = require('../utils/logger');
 const campaignService = require('../services/CampaignService');
 const adGroupsService = require('../services/AdGroupsService');
 const portfolioService = require('../services/PortfolioService');
@@ -32,7 +31,6 @@ class WebSocketService {
             };
             
         } catch (error) {
-            logger.error(`Error fetching real-time data: ${error.message}`);
             return null;
         }
     }
@@ -53,12 +51,10 @@ class WebSocketService {
             const currentDataString = JSON.stringify(this.currentData);
 
             if (newDataString !== currentDataString) {
-                logger.info('Datos actualizados detectados');
                 this.currentData = newData;
                 callback(newData);
                 this.broadcastToAll({ type: 'update', data: newData });
             } else {
-                logger.debug('No hay cambios en los datos');
             }
         }, this.pollingInterval);
     }
@@ -72,9 +68,7 @@ class WebSocketService {
             if (client.readyState === WebSocket.OPEN) {
                 try {
                     client.send(message);
-                    logger.debug(`Mensaje broadcast enviado a ${id}`);
                 } catch (error) {
-                    logger.error(`Error enviando mensaje a ${id}: ${error.message}`);
                     // Considerar eliminar clientes con error
                     this.removeClient(id);
                 }
@@ -85,14 +79,12 @@ class WebSocketService {
     // Method to add a client
     addClient(id, client) {
         this.clients.set(id, client);
-        logger.info(`Cliente ${id} añadido, total de clientes: ${this.clients.size}`);
     }
 
     // Method to remove a client
     removeClient(id) {
         const wasDeleted = this.clients.delete(id);
         if (wasDeleted) {
-            logger.info(`Cliente ${id} eliminado, clientes restantes: ${this.clients.size}`);
         }
     }
     

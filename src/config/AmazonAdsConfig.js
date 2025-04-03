@@ -1,5 +1,4 @@
 const axios = require('axios');
-const logger = require('../utils/logger');
 
 class AmazonAdsConfig {
     constructor() {
@@ -38,7 +37,6 @@ class AmazonAdsConfig {
             // Obtener access token válido
             const accessToken = await this.getValidAccessToken();
             
-            logger.info('Creando instancia de Axios para Amazon Ads API');
             
             // Crear instancia de axios con interceptores
             const instance = axios.create({
@@ -56,7 +54,6 @@ class AmazonAdsConfig {
                 response => response,
                 async error => {
                     if (error.response?.status === 401) {
-                        logger.info('Token expirado, refrescando...');
                         this.accessToken = null; // Forzar refresh
                         const newToken = await this.getValidAccessToken();
                         error.config.headers['Authorization'] = `Bearer ${newToken}`;
@@ -72,7 +69,6 @@ class AmazonAdsConfig {
             return instance;
 
         } catch (error) {
-            logger.error('Error creando instancia de Axios:', error.message);
             throw new Error(`Error en la configuración de Amazon Ads: ${error.message}`);
         }
     }
@@ -80,9 +76,7 @@ class AmazonAdsConfig {
     async testConnection(instance) {
         try {
             await instance.get('/v2/profiles');
-            logger.info('Conexión exitosa con Amazon Ads API');
         } catch (error) {
-            logger.error('Error en la prueba de conexión:', error.response?.data || error.message);
             throw error;
         }
     }
@@ -94,7 +88,6 @@ class AmazonAdsConfig {
         }
 
         try {
-            logger.info('Solicitando nuevo access token');
             
             const response = await axios.post('https://api.amazon.com/auth/o2/token', 
                 new URLSearchParams({
@@ -116,11 +109,9 @@ class AmazonAdsConfig {
             //console.log(this.accessToken);
             //console.log(this.accessToken);
             console.log(this.tokenExpiration);
-            logger.info('Nuevo access token obtenido exitosamente');
             return this.accessToken;
 
         } catch (error) {
-            logger.error('Error obteniendo access token:', error.response?.data || error.message);
             throw new Error('Error al obtener access token');
         }
     }

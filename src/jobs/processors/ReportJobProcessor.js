@@ -1,6 +1,5 @@
 const {generateDailyReport , getReport , downloadAndProcessReport , saveReportToDatabase} = require('../../services/ReportService');
 const { sequelize } = require('../../config/dbConfig');
-const logger = require('../../utils/logger');
 
 class ReportProcessor {
     /*constructor() {
@@ -11,7 +10,6 @@ class ReportProcessor {
         const { sponsored_type_id, reportId } = job.data;
         console.log({ sponsored_type_id, reportId });
         console.log(sponsored_type_id);
-        logger.info(`Iniciando procesamiento para sponsored_type_id: ${sponsored_type_id}`);
 
         const transaction = await sequelize.transaction();
 
@@ -20,7 +18,6 @@ class ReportProcessor {
            // const generatedReportId = await this.reportService.generateDailyReport(sponsored_type_id);
             const generatedReportId = await generateDailyReport(sponsored_type_id);
             console.log(generatedReportId);
-            logger.info(`Reporte generado: ${generatedReportId}`);
 
             // Esperar y verificar estado
             const reportData = await this.pollReportStatus(generatedReportId);
@@ -38,11 +35,9 @@ class ReportProcessor {
             }, transaction);
 
             await transaction.commit();
-            logger.info(`Reporte ${generatedReportId} procesado y guardado con éxito`);
             return { success: true, reportId: savedReport.id };
         } catch (error) {
             await transaction.rollback();
-            logger.error(`Error en procesamiento: ${error.message}`);
             throw error;
         }
     }
@@ -55,7 +50,6 @@ class ReportProcessor {
             //const status = await this.reportService.getReport(reportId);
             const status = await getReport(reportId);
             if (status.status === 'COMPLETED') {
-                logger.info(`Reporte ${reportId} completado con éxito - status: ${status.status}`);
                 //return await this.reportService.downloadAndProcessReport(status.url);
                 return await downloadAndProcessReport(status.url);
             }
@@ -64,7 +58,6 @@ class ReportProcessor {
                 throw new Error(`Reporte fallido: ${status.statusDetails || 'Unknown error'}`);
             }
 
-            logger.info(`Esperando estado del reporte ${reportId}, intento ${attempts + 1}/${maxAttempts}`);
             await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
             attempts++;
         }

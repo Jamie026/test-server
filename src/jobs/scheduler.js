@@ -1,6 +1,5 @@
 const Queue = require('bull');
 const { ReportProcessor } = require('./processors/ReportJobProcessor'); // Ruta correcta
-const logger = require('../utils/logger');
 const Report = require('../models/ReportModel');
 const { sequelize } = require('../config/dbConfig');
 
@@ -36,25 +35,20 @@ class ReportScheduler {
     async initializeQueue() {
         this.reportQueue.on('completed', async (job, result) => {
             const { reportId, sponsored_type_id } = job.data;
-            logger.info(`Reporte ${reportId} procesado exitosamente para sponsored_type_id: ${sponsored_type_id}`);
             // Nota: No actualizamos status aquí porque ReportModel.js no tiene ese campo
         });
 
         this.reportQueue.on('failed', async (job, error) => {
             const { reportId, sponsored_type_id } = job.data;
-            logger.error(`Error procesando reporte ${reportId} para ${sponsored_type_id}: ${error.message}`);
         });
 
         this.reportQueue.on('stalled', (job) => {
-            logger.warn(`Job ${job.id} stalled`);
         });
 
         this.reportQueue.on('error', (error) => {
-            logger.error('Queue error:', error);
         });
 
         this.reportQueue.process(async (job) => {
-            logger.info(`Procesando job ${job.id} para ${job.data.sponsored_type_id}`);
             return await this.processor.process(job);
         });
     }
@@ -82,17 +76,14 @@ class ReportScheduler {
                 timestamp: new Date().toISOString()
             });
 
-            logger.info(`Reporte programado: ${job.id} para sponsored_type_id: ${sponsoredType}`);
             console.log("Reporte ID :",report.id);
             return report.id;
         } catch (error) {
-            logger.error(`Error programando reporte para ${sponsoredType}: ${error.message}`);
             throw error;
         }
     }
 
     async scheduleAllDailyReports() {
-        logger.info('Programando reportes diarios para todos los tipos de sponsored');
         const reportIds = [];
 
         for (const sponsoredType of this.SPONSORED_TYPES) {
@@ -100,7 +91,6 @@ class ReportScheduler {
                 const reportId = await this.scheduleReport(sponsoredType);
                 reportIds.push({ type: sponsoredType, id: reportId });
             } catch (error) {
-                logger.error(`Error programando reporte para ${sponsoredType}: ${error.message}`);
             }
         }
 
