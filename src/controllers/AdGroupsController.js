@@ -1,5 +1,5 @@
 const SKU = require("../models/SkuModel");
-const Campaign = require("../models/CampaignModel");
+const Campaign = require("../models/campaignModel");
 const { adGroupsListSP , adGroupsListSB} = require("../services/AdGroupsService");
 const { productsAdsSP } = require("../services/AdsService");
 
