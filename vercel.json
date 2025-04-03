@@ -4,8 +4,8 @@
         "src": "app.js",
         "use":  "@vercel/node"
     }],
-    "routes": {
+    "routes": [{
         "src": "/(.*)",
         "dest": "app.js"
-    }
+    }]
 }
