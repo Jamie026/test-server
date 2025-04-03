@@ -1,6 +1,6 @@
 // src/controllers/ParametrosController.js
 const AdGroupModel = require('../models/AdGroupModel');
-const CampaignModel = require('../models/CampaignModel');
+const CampaignModel = require('../models/campaignModel');
 const PortfolioModel = require('../models/PortfolioModel');
 const SkuModel = require('../models/SkuModel');
 const AsinModel = require('../models/AsinModel');
