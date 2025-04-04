@@ -16,16 +16,12 @@ app.use(cors({
 let clients = {};  // Objeto para almacenar las conexiones activas por un identificador único, por ejemplo, userId
 
 app.get('/events', (req, res) => {
-    const userId = req.query.userId;
-    console.log("userId recibido:", userId);  // Agrega un log aquí para verificar
-    if (!userId || clients[userId]) {
-        console.log("Res:", res);
+    console.log("userId recibido:");  // Agrega un log aquí para verificar
+    if (!clients[res]) {
         res.status(400).send('Ya tienes una conexión activa.');
         return;
     }
-    clients[userId] = res;
-
-    console.log("Res:", res);
+    clients[res] = res;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -35,7 +31,7 @@ app.get('/events', (req, res) => {
     res.write('data: Hola cliente 👋');
 
     req.on('close', () => {
-        delete clients[userId];  // Eliminar al cliente cuando se desconecte
+        delete clients[res];  // Eliminar al cliente cuando se desconecte
     });
 });
 
@@ -45,7 +41,7 @@ app.post("/notify", async (req, res) => {
         const newData = await getData();
         console.log('🔄 Datos actualizados, enviando mensaje a los clientes...');
 
-        console.log(clients);
+        console.log(Object.keys(clients).length);
         
         // Envía los datos a todos los clientes conectados
         clients.forEach(client => {
