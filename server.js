@@ -19,10 +19,13 @@ app.get('/events', (req, res) => {
     const userId = req.query.userId;
     console.log("userId recibido:", userId);  // Agrega un log aquí para verificar
     if (!userId || clients[userId]) {
+        console.log("Res:", res);
         res.status(400).send('Ya tienes una conexión activa.');
         return;
     }
     clients[userId] = res;
+
+    console.log("Res:", res);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -42,6 +45,8 @@ app.post("/notify", async (req, res) => {
         const newData = await getData();
         console.log('🔄 Datos actualizados, enviando mensaje a los clientes...');
 
+        console.log(clients);
+        
         // Envía los datos a todos los clientes conectados
         clients.forEach(client => {
             client.write(`data: ${JSON.stringify({ type: 'update', data: newData })}\n\n`);
