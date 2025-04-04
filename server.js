@@ -19,6 +19,7 @@ app.get('/events', (req, res) => {
     res.write('data: Hola cliente 👋\n\n');
 
     if (clients.find((client => client == res))) {
+        console.log("Ya registrado.");
         res.status(400).send('Ya tienes una conexión activa.');
         return;
     }
