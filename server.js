@@ -24,14 +24,9 @@ app.get('/events', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.write('data: Hola cliente 👋\n\n');
-
-    const interval = setInterval(() => {
-        res.write(`data: Actualización: ${new Date().toISOString()}\n\n`);
-    }, 3000);
+    res.write('data: Hola cliente 👋');
 
     req.on('close', () => {
-        clearInterval(interval);
         delete clients[userId];  // Eliminar al cliente cuando se desconecte
     });
 });
