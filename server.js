@@ -5,7 +5,11 @@ const socketIo = require('socket.io');
 
 const server = http.createServer(app);
 const io = socketIo(server, {
-    path: '/socket.io', // Especifica la ruta correcta para Socket.IO
+    cors: {
+        origin: "http://localhost:3000",  // Permite que el cliente desde localhost:3000 se conecte
+        methods: ["GET", "POST"],  // Permite métodos GET y POST
+        credentials: true // Si usas cookies o sesiones, habilita esto
+    }
 });
 
 io.on('connection', (socket) => {

@@ -101,5 +101,6 @@ async function getData() {
     }
 }
 
+const instance = new WebSocketService();
 
-module.exports = { WebSocketService, getData };
+module.exports = { instance, getData };
