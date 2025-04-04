@@ -18,6 +18,10 @@ app.get('/events', (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.write('data: Hola cliente 👋\n\n');
 
+    if (req.body && req.body.message) {
+        console.log('Mensaje recibido desde el cliente:', req.body.message);
+    }
+
     if (clients.find((client => client == res))) {
         console.log("Ya registrado.");
         res.status(400).send('Ya tienes una conexión activa.');
