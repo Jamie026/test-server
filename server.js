@@ -6,32 +6,27 @@ const cors = require('cors');
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT);
-app.use(cors({
-    origin: '*', // o el dominio que necesites
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
-    credentials: true
-}));
+app.use(cors());
 
-let clients = {};  // Objeto para almacenar las conexiones activas por un identificador único, por ejemplo, userId
+let clients = [];
 
 app.get('/events', (req, res) => {
-    console.log("userId recibido:");  // Agrega un log aquí para verificar
-    if (!clients[res]) {
-        res.status(400).send('Ya tienes una conexión activa.');
-        return;
-    }
-    clients[res] = res;
-
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.write('data: Hola cliente 👋');
+    res.write('data: Hola cliente 👋\n\n');
+
+    if (clients.find((client => client == res))) {
+        res.status(400).send('Ya tienes una conexión activa.');
+        return;
+    }
+
+    clients.push(res);
 
     req.on('close', () => {
-        delete clients[res];  // Eliminar al cliente cuando se desconecte
+        clients = clients.filter(client => client !== res);
     });
 });
 
@@ -41,9 +36,8 @@ app.post("/notify", async (req, res) => {
         const newData = await getData();
         console.log('🔄 Datos actualizados, enviando mensaje a los clientes...');
 
-        console.log(Object.keys(clients).length);
-        
-        // Envía los datos a todos los clientes conectados
+        console.log(clients.length);
+
         clients.forEach(client => {
             client.write(`data: ${JSON.stringify({ type: 'update', data: newData })}\n\n`);
         });
