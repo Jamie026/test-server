@@ -17,19 +17,7 @@ app.get('/events', (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.write('data: Hola cliente 👋\n\n');
-
-    if (req.body && req.body.message) {
-        console.log('Mensaje recibido desde el cliente:', req.body.message);
-    }
-
-    if (clients.find((client => client == res))) {
-        console.log("Ya registrado.");
-        res.status(400).send('Ya tienes una conexión activa.');
-        return;
-    }
-
     clients.push(res);
-
     req.on('close', () => {
         clients = clients.filter(client => client !== res);
     });
@@ -40,13 +28,9 @@ app.post("/notify", async (req, res) => {
         console.log("Notificación recibida.");
         const newData = await getData();
         console.log('🔄 Datos actualizados, enviando mensaje a los clientes...');
-
-        console.log(clients.length);
-
         clients.forEach(client => {
             client.write(`data: ${JSON.stringify({ type: 'update', data: newData })}\n\n`);
         });
-
         res.send({ message: 'Ok' });
     } catch (error) {
         console.error("Error al procesar la notificación:", error);
