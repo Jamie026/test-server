@@ -1,7 +1,8 @@
 const campaignService = require('./CampaignService');
 const adGroupsService = require('./AdGroupsService');
 const portfolioService = require('./PortfolioService');
-const { productsAdsSP } = require('./AdsService')
+const { productsAdsSP } = require('./AdsService');
+const axios = require("axios");
 
 function mergeCampaignsWithASIN(campaigns, productos){
     return productos.map(producto => ({
@@ -52,4 +53,9 @@ async function getData() {
     }
 }
 
-module.exports = { getData };
+const notifyBOT = async() =>{
+    await axios.get("https://bot-produccion.onrender.com");
+    console.log("BOT notificado.");
+}
+
+module.exports = { getData, notifyBOT };
