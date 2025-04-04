@@ -1,6 +1,6 @@
 require('dotenv').config();
 const app = require('./app');
-const { getData, notifyBOT } = require('./src/services/realTimeService');
+const { getData } = require('./src/services/realTimeService');
 const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -31,7 +31,6 @@ app.post("/notify", async (req, res) => {
         const newData = await getData();
         console.log('🔄 Datos actualizados, enviando mensaje a los clientes...');
 
-        // Enviar datos a todos los clientes WebSocket
         io.emit('update', { type: 'update', data: newData });
 
         res.send({ message: 'Ok' });
