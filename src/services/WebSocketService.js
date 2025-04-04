@@ -4,106 +4,51 @@ const adGroupsService = require('../services/AdGroupsService');
 const portfolioService = require('../services/PortfolioService');
 const { productsAdsSP } = require('../services/AdsService')
 
+const socketIo = require('socket.io');
+
 class WebSocketService {
-    constructor() {
-        this.campaignService = campaignService;
-        this.adGroupsService = adGroupsService;
-        this.portfolioService = portfolioService;
-        this.currentData = null;
-        this.pollingInterval = 60000;
-        this.clients = new Map(); // Map to store WebSocket clients
+    constructor(server) {
+        this.io = socketIo(server); // Usamos el servidor HTTP como base para Socket.IO
+        this.clients = new Map(); // Mapa para almacenar clientes conectados
+        
+        // Configurar la conexión de Socket.IO
+        this.io.on('connection', (socket) => {
+            console.log('Nuevo cliente conectado:', socket.id);
+
+            // Añadir el cliente a la lista
+            this.addClient(socket.id, socket);
+
+            // Escuchar los mensajes del cliente (si es necesario)
+            socket.on('message', (message) => {
+                console.log('Mensaje recibido del cliente:', message);
+                // Maneja el mensaje aquí si es necesario
+            });
+
+            // Cuando el cliente se desconecta, lo eliminamos
+            socket.on('disconnect', () => {
+                console.log('Cliente desconectado:', socket.id);
+                this.removeClient(socket.id);
+            });
+
+            // Manejo de errores
+            socket.on('error', (error) => {
+                console.error('Error en Socket.IO:', error);
+            });
+        });
     }
 
-    async fetchData() {
-        try {
-            const [campaignsSP, campaignsSB, adGroupsSP, adGroupsSB, portfolios] = await Promise.all([
-                this.campaignService.campaignsListSP(),
-                this.campaignService.campaignsListSB(),
-                this.adGroupsService.adGroupsListSP(),
-                this.adGroupsService.adGroupsListSB(),
-                this.portfolioService.portfoliosList()
-            ]);
-
-            return {
-                campaigns: { sp: campaignsSP, sb: campaignsSB },
-                adGroups: { sp: adGroupsSP, sb: adGroupsSB },
-                portfolios
-            };
-            
-        } catch (error) {
-            return null;
-        }
-    }
-
-    async getCurrentData() {
-        if (!this.currentData) {
-            this.currentData = await this.fetchData();
-        }
-        return this.currentData;
-    }
-
-    startPolling(callback) {
-        setInterval(async () => {
-            const newData = await this.fetchData();
-            if (!newData) return;
-
-            const newDataString = JSON.stringify(newData);
-            const currentDataString = JSON.stringify(this.currentData);
-
-            if (newDataString !== currentDataString) {
-                this.currentData = newData;
-                callback(newData);
-                this.broadcastToAll({ type: 'update', data: newData });
-            } else {
-            }
-        }, this.pollingInterval);
-    }
-
-    // Broadcast message to all connected WebSocket clients
+    // Método para emitir un mensaje a todos los clientes
     broadcastToAll(data) {
         const message = JSON.stringify(data);
-        const WebSocket = require('ws');
-        
-        this.clients.forEach((client, id) => {
-            if (client.readyState === WebSocket.OPEN) {
-                try {
-                    client.send(message);
-                } catch (error) {
-                    // Considerar eliminar clientes con error
-                    this.removeClient(id);
-                }
-            }
-        });
+        this.io.emit('update', message); // Emite el evento 'update' a todos los clientes
     }
 
-    // Method to add a client
     addClient(id, client) {
-        this.clients.set(id, client);
+        this.clients.set(id, client); // Guardamos el cliente en el mapa
     }
 
-    // Method to remove a client
     removeClient(id) {
-        const wasDeleted = this.clients.delete(id);
-        if (wasDeleted) {
-        }
-    }
-    
-    // Método para notificar sobre cambios en parámetros
-    notifyParametersChange(parametersData) {
-        this.broadcastToAll({
-            type: 'parameters_update',
-            data: parametersData,
-            timestamp: new Date().toISOString()
-        });
-    }
-    
-    // Método para notificar cambios de estado en AdGroups
-    notifyAdGroupStatusChange(adGroups) {
-        this.broadcastToAll({
-            type: 'adgroup_status_update',
-            data: adGroups,
-            timestamp: new Date().toISOString()
-        });
+        this.clients.delete(id); // Eliminamos el cliente del mapa cuando se desconecta
     }
 }
 
@@ -156,5 +101,5 @@ async function getData() {
     }
 }
 
-const instance = new WebSocketService();
-module.exports = { instance, getData };
+
+module.exports = { WebSocketService, getData };
