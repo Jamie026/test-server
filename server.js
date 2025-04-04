@@ -6,7 +6,6 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 
 const PORT = process.env.PORT || 5000;
-
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
@@ -20,8 +19,6 @@ app.use(cors());
 // WebSockets
 io.on('connection', async (socket) => {
     console.log(`🔗 Cliente conectado: ${socket.id}`);
-
-    await notifyBOT();
 
     socket.on('disconnect', () => {
         console.log(`❌ Cliente desconectado: ${socket.id}`);
@@ -44,7 +41,7 @@ app.post("/notify", async (req, res) => {
     }
 });
 
-// Iniciar servidor
+// Iniciar servidors
 server.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
