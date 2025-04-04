@@ -21,6 +21,8 @@ app.get('/events', (req, res) => {
     // Registrar la nueva conexión
     clients[userId] = res;
 
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
