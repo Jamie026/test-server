@@ -7,10 +7,7 @@ const sequelize = new Sequelize(
     process.env.DB_PASSWORD,
     {
         host: process.env.DB_HOST,
-        dialect: 'mysql',
-        dialectModule: require('mysql2'),
         port: 3306,
-        logging: false,
         define: {
             underscored: true // Forzar snake_case en la BD
         }
