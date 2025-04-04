@@ -18,10 +18,10 @@ const io = new Server(server, {
 app.use(cors());
 
 // WebSockets
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log(`🔗 Cliente conectado: ${socket.id}`);
 
-    notifyBOT();
+    await notifyBOT();
 
     socket.on('disconnect', () => {
         console.log(`❌ Cliente desconectado: ${socket.id}`);
