@@ -8,23 +8,34 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT);
 app.use(cors());
 
-let clients = [];
+let clients = {};  // Objeto para almacenar las conexiones activas por un identificador único, por ejemplo, userId
 
 app.get('/events', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    const userId = req.query.userId;  // Obtener el identificador único del cliente, por ejemplo, desde los parámetros de la URL
+    if (!userId || clients[userId]) {
+        // Si el cliente ya está registrado, cierra la conexión
+        res.status(400).send('Ya tienes una conexión activa.');
+        return;
+    }
+
+    // Registrar la nueva conexión
+    clients[userId] = res;
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-
     res.write('data: Hola cliente 👋\n\n');
 
-    clients.push(res);
+    const interval = setInterval(() => {
+        res.write(`data: Actualización: ${new Date().toISOString()}\n\n`);
+    }, 3000);
 
     req.on('close', () => {
-        clients = clients.filter(client => client !== res);
+        clearInterval(interval);
+        delete clients[userId];  // Eliminar al cliente cuando se desconecte
     });
 });
+
 
 app.post("/notify", async (req, res) => {
     try {
