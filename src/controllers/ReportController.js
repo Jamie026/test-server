@@ -4,7 +4,7 @@ const { reportList } = require("./../database/ReportsQuery");
 const { generateDailyReport, getReport, downloadAndProcessReport } = require("../services/ReportService");
 const SponsoredType = require('../models/SponsoredTypeModel')
 const { Op, fn, col, where } = require('sequelize');
-const { getData } = require('./../services/WebSocketService')
+const { getData } = require('../services/realTimeService')
 
 // Generar el reporte diario
 const createDailyReport = async (req, res) => {
