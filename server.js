@@ -1,13 +1,17 @@
 require('dotenv').config();
 const app = require('./app');
-const WebSocket = require('ws');
-const { getData } = require('./src/services/WebSocketService'); // Ya es una instancia
+const { getData } = require('./src/services/WebSocketService');
+const cors = require('cors');
 
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT);
+app.use(cors());
 
 app.get('/events', (req, res) => {
+    // CORS headers:
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true'); 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -21,15 +25,5 @@ app.get('/events', (req, res) => {
     req.on('close', () => clearInterval(interval));
 });
 
-
-app.post("/notify", async (req, res) => {
-    try {
-        console.log("Notificación recibida.");
-        const newData = await getData();
-        instance.broadcastToAll({ type: 'update', data: newData });
-        res.send({ message: 'Ok'})
-    } catch (error) {
-    }
-})
 
 module.exports = { app, server };
