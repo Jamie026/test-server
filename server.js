@@ -12,7 +12,17 @@ const server = http.createServer(app);
 // Configurar socket.io
 const io = socketIo(server, {
     cors: {
-        origin: "http://localhost:3000",  // Permite que el cliente desde localhost:3000 se conecte
+        cors: {
+            origin: (origin, callback) => {
+                if (!origin || origin.startsWith('http://localhost:3000')) {
+                    callback(null, true);
+                } else {
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
+            methods: ["GET", "POST"],
+            credentials: true
+        },        
         methods: ["GET", "POST"],  // Permite métodos GET y POST
         credentials: true // Si usas cookies o sesiones, habilita esto
     }
