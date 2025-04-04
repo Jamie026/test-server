@@ -55,5 +55,3 @@ app.post("/notify", async (req, res) => {
     } catch (error) {
     }
 })
-
-module.exports = { app, server };
